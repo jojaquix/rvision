@@ -1,0 +1,5 @@
+[package]
+name = "rvision"
+version = "0.1.0"
+authors = ["Jhon James Quintero <jojaquix@gmail.com>"]
+edition = "2018"

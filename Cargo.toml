@@ -1,9 +1,18 @@
 [package]
-name = "rvision"
+name = "rvision_ex"
 version = "0.1.0"
-authors = ["Jhon James Quintero <jhon.quintero@alertlogic.com>"]
+authors = ["Jhon James Quintero <jojaquix@gmail.com>"]
 edition = "2018"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+cty = "0.2.1"
+rvision = { path = "./rvision"}
+
+
+[target.'cfg(linux)'.dependencies]
+libc = "0.2.0"
+
+[target.'cfg(windows)'.dependencies]
+winapi = { version= "0.3.8", features = ['minwindef', 'wtypesbase', 'wincon', 'winbase', 'winnt', 'processenv'] }
