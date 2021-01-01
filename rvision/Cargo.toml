@@ -3,3 +3,9 @@ name = "rvision"
 version = "0.1.0"
 authors = ["Jhon James Quintero <jojaquix@gmail.com>"]
 edition = "2018"
+
+[target.'cfg(linux)'.dependencies]
+libc = "0.2.0"
+
+[target.'cfg(windows)'.dependencies]
+winapi = { version= "0.3.8", features = ['minwindef', 'wtypesbase', 'wincon', 'winbase', 'winnt', 'processenv'] }

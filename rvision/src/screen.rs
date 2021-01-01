@@ -26,9 +26,6 @@ type TScreenDriverDetectedCallBack = fn();
 static TDISPLAY_MODES_NUM: i32 = 18;
 
 
-
-
-
 pub fn say_hi_base() {
  println!("hello base");
 }
@@ -39,11 +36,32 @@ pub fn say_hi_base() {
 mod imp;
 
 pub fn say_hi() {
-  imp::say_hi();
+  imp::say_hi()
 }
 
+/// clear entire the screen
+pub fn clear() {
+  imp::clear()
+}
 
+/// rows
+pub fn get_rows() -> u16 {
+  imp::get_rows()
+}
 
+/// cols
+pub fn get_cols() -> u16 {  
+  imp::get_cols()
+}
+
+pub fn set_cursor_pos(x: u16, y: u16 ) {
+  imp::set_cursor_pos(x, y)
+}
+
+// (x, y) == (col, row)
+pub fn get_cursor_pos() -> (u16, u16) {
+  imp::get_cursor_pos()
+}
 
 
 
