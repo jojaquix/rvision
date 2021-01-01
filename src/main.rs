@@ -1,6 +1,7 @@
 
 extern crate rvision;
 use crate::rvision::screen;
+use crate::rvision::point;
 
 
 fn main() {
@@ -14,7 +15,9 @@ fn main() {
 
     let cur_pos = screen::get_cursor_pos();
 
-    println!("{:?}", cur_pos)
+    println!("{:?}", cur_pos);
+
+    let mut _p1 = point::TPoint { x: 10, y: 20};
    
 }
 
@@ -38,16 +41,23 @@ mod test {
     }
 
     #[test]
-    fn set_cursor_pos_test() {
-        screen::set_cursor_pos(10, 10)
-    }
-
-    #[test]
     fn get_cursor_pos_test() {
         screen::set_cursor_pos(0, 0);
         let pos = screen::get_cursor_pos();
         println!("{:?}", pos);
-        assert!(pos.0 == 0 && pos.1 == 0);
+    }
+
+    #[test]
+    fn point_test() {
+        let p1 = point::TPoint { x: 10, y: 20};
+        let p2 = point::TPoint { x: 5, y: 5};
+        let p3 = p1 + p2;
+        assert!(p3.x == 15 && p3.y == 25);
+        assert!(!point::TPoint::equal(&p1, &p2));
+        let p4 = point::TPoint::add(&p1, &p2);
+        assert!(point::TPoint::equal(&p4, &p3));
+        let p5 = p1 - p2;
+        assert!(p5.x == 5 && p5.y == 15);
     }
 
     

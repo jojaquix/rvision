@@ -23,8 +23,16 @@ type TFontRequestCallBack = fn(which: i32, width: u16, height: u16 ) -> Box<TFon
 type TScreenDriverDetectedCallBack = fn();
 
 
-static TDISPLAY_MODES_NUM: i32 = 18;
+const TDISPLAY_MODES_NUM: i32 = 18;
 
+
+pub enum VideoModes
+ {
+  SmBw80    = 0x0002,
+  SmCo80    = 0x0003, 
+  SmMono    = 0x0007,
+  SmFont8x8 = 0x0100 
+ }
 
 pub fn say_hi_base() {
  println!("hello base");
@@ -54,11 +62,13 @@ pub fn get_cols() -> u16 {
   imp::get_cols()
 }
 
+/// set cursor position
 pub fn set_cursor_pos(x: u16, y: u16 ) {
   imp::set_cursor_pos(x, y)
 }
 
-// (x, y) == (col, row)
+/// get the current cursor position
+/// (x, y) == (col, row)
 pub fn get_cursor_pos() -> (u16, u16) {
   imp::get_cursor_pos()
 }
