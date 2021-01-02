@@ -9,17 +9,22 @@ pub struct TPoint {
 }
 
 impl TPoint {
-  pub fn add(a: &TPoint, b: &TPoint) -> TPoint {
+  pub fn add(a: TPoint, b: TPoint) -> TPoint {
     TPoint {x : a.x + b.x, y: a.y + b.y }
   }
 
-  pub fn sub(a: &TPoint, b: &TPoint) -> TPoint {
+  pub fn sub(a: TPoint, b: TPoint) -> TPoint {
     TPoint {x : a.x - b.x, y: a.y - b.y }
   }
 
-  pub fn equal (a: &TPoint, b: &TPoint) -> bool {
+  pub fn equal (a: TPoint, b: TPoint) -> bool {
     a.x == b.x  &&  a.y == b.y
   }
+
+  pub fn equalr (a: &TPoint, b: &TPoint) -> bool {
+    a.x == b.x  &&  a.y == b.y
+  }
+  
 }
 
 impl Add for TPoint {
