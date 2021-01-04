@@ -2,27 +2,45 @@ extern crate rvision;
 use crate::rvision::screen;
 use crate::rvision::point;
 use crate::rvision::rect;
+use crate::rvision::view;
+
 
 
 fn main() {
-    println!("Hello, world!");
-    screen::say_hi_base();
-    screen::say_hi();
+    //println!("Hello, world!");
+    //screen::say_hi_base();
+    //screen::say_hi();
     let _res = screen::TResolution  { x:80, y:25};
     screen::clear();
-    screen::set_cursor_pos(0, 10);
+    //screen::set_cursor_pos(0, 10);
     let mut cur_pos = screen::get_cursor_pos();
-    println!("{:?}", cur_pos);
-    screen::say_hi();
+    //println!("{:?}", cur_pos);
+    //screen::say_hi();
     cur_pos = screen::get_cursor_pos();
-    println!("{:?}", cur_pos);
+    //println!("{:?}", cur_pos);
 
-    let mut _p1 = point::TPoint { x: cur_pos.0 as i16, y: cur_pos.1 as i16};
-    let mut _r1 = rect::TRect { 
-                a: point::TPoint {x: 10, y: 10}, 
-                b: point::TPoint{x: 40, y: 20 }
+    //let mut _p1 = point::TPoint { x: cur_pos.0 as i16, y: cur_pos.1 as i16};
+    let mut r1 = rect::TRect { 
+                a: point::TPoint {x: 0, y: 0}, 
+                b: point::TPoint{x: 20, y: 10 }
             };
-   
+    //print!("{}",3*'c'); 
+
+    let tview = view::TView::new(r1);
+    tview.write_char(1, 1, '=', 20);
+
+    
+    let r2 = rect::TRect { 
+        a: point::TPoint {x: 50, y: 10}, 
+        b: point::TPoint{x: 60, y: 20 }
+    };
+
+    let tview2 = view::TView::new(r2);
+    tview2.write_line(0, 0, '#');
+    tview2.write_line(1, 1, '$');
+
+
+
 }
 
 #[cfg(test)]
@@ -64,6 +82,15 @@ mod test {
         assert!(point::TPoint::equal(p4, p3));
         let p5 = p1 - p2;
         assert!(p5.x == 5 && p5.y == 15);
+
+        let mut p6 = p1;
+        p6 += p2;
+        assert!(point::TPoint::equal(p6, p3));
+
+        let mut p7 = p6;
+        p7 -= p2;
+        assert!(point::TPoint::equal(p7, p1));
+
     }
 
     #[test]

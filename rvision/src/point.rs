@@ -1,4 +1,4 @@
-use std::ops::{Add, Sub};
+use std::ops::{Add, Sub, AddAssign, SubAssign};
 
 
 /// One point on the screen, with some vector operations
@@ -38,5 +38,23 @@ impl Sub for TPoint {
   type Output = Self;
   fn sub(self, other: Self) -> Self {
       Self {x: self.x - other.x, y: self.y - other.y}
+  }
+}
+
+impl AddAssign for TPoint {
+  fn add_assign(&mut self, other: Self) {
+        *self = Self {
+            x: self.x + other.x,
+            y: self.y + other.y,
+        };
+  }
+}
+
+impl SubAssign for TPoint {
+  fn sub_assign(&mut self, other: Self) {
+      *self = Self {
+          x: self.x - other.x,
+          y: self.y - other.y,
+      };
   }
 }

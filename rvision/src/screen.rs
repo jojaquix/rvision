@@ -73,6 +73,10 @@ pub fn get_cursor_pos() -> (u16, u16) {
   imp::get_cursor_pos()
 }
 
+/// write on screen global coordinates
+pub fn write_char(x: u16, y: u16, c: char) {
+  imp::write_char(x ,y , c);
+}
 
 
 
