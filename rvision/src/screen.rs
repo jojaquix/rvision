@@ -78,6 +78,14 @@ pub fn write_char(x: u16, y: u16, c: char) {
   imp::write_char(x ,y , c);
 }
 
+pub fn write_nchar(x: u16, y: u16, c: char, count: i16) {
+  imp::write_nchar(x ,y , c, count);
+}
+
+pub fn write_string(x: u16, y: u16, s: String) {
+  imp::write_string(x ,y , s);
+}
+
 
 
 

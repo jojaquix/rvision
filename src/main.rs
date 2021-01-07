@@ -21,13 +21,13 @@ fn main() {
 
     //let mut _p1 = point::TPoint { x: cur_pos.0 as i16, y: cur_pos.1 as i16};
     let mut r1 = rect::TRect { 
-                a: point::TPoint {x: 0, y: 0}, 
+                a: point::TPoint {x: 5, y: 5}, 
                 b: point::TPoint{x: 20, y: 10 }
             };
     //print!("{}",3*'c'); 
 
     let tview = view::TView::new(r1);
-    tview.write_char(1, 1, '=', 20);
+    tview.write_char(1, 1, '=', 0, 20);
 
     
     let r2 = rect::TRect { 
@@ -36,8 +36,8 @@ fn main() {
     };
 
     let tview2 = view::TView::new(r2);
-    tview2.write_line(0, 0, '#');
-    tview2.write_line(1, 1, '$');
+    tview2.write_line(0, 0, 11, 11,  '#');
+    tview2.write_line(1, 1, 8, 8,  '$');
 
 
 

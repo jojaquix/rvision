@@ -111,24 +111,45 @@ fn get_size() -> (u16, u16) {
 
 }
 
-
-pub fn write_char(x: u16, y: u16, c: char) {
+pub fn write_string(x: u16, y: u16, s: String) {
   let success: BOOL;
   let coord_screen = COORD {X: x as i16, Y: y as i16};  // pos for the cursor
   let mut written: DWORD = 0;
 
-  let string = c.to_string();
+  let os_string = OsString::from(s);
+  let wide_encoded: Vec<u16> = os_string.encode_wide().collect();
+
+  unsafe {
+    let h_stdout: HANDLE;
+    h_stdout = GetStdHandle(STD_OUTPUT_HANDLE);    
+    success = WriteConsoleOutputCharacterW(h_stdout, wide_encoded.as_ptr(), wide_encoded.len() as u32, coord_screen, &mut written);
+  }
+  if success == FALSE {
+    panic!("Error in low level access to console writing");
+  }  
+}
+
+pub fn write_nchar(x: u16, y: u16, c: char, count: i16) {
+  let success: BOOL;
+  let coord_screen = COORD {X: x as i16, Y: y as i16};  // pos for the cursor
+  let mut written: DWORD = 0;
+
+  let string = (0..count).map(|_| c).collect::<String>();
   let os_string = OsString::from(string);
   let wide_encoded: Vec<u16> = os_string.encode_wide().collect();
 
   unsafe {
     let h_stdout: HANDLE;
-    h_stdout = GetStdHandle(STD_OUTPUT_HANDLE);
+    h_stdout = GetStdHandle(STD_OUTPUT_HANDLE);    
     success = WriteConsoleOutputCharacterW(h_stdout, wide_encoded.as_ptr(), wide_encoded.len() as u32, coord_screen, &mut written);
   }
   if success == FALSE {
     panic!("Error in low level access to console writing");
-  }
+  }  
+}
+
+pub fn write_char(x: u16, y: u16, c: char) {
+  write_nchar(x, y, c, 1);
 }
 
 

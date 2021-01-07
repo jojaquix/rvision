@@ -40,24 +40,27 @@ impl TView {
     TRect { a: TPoint {x: 0, y: 0}, b: self.size }
   }
 
-  pub fn write_char(&self, x :i16, y: i16, c: char, count: i16) {
+
+  /// Beginning at the point (x, y), writes 'count' copies of the character
+  /// 'c' in the color determined by the color'th entry in the current view's
+  /// palette. Should only be used in @ref draw() functions.
+  
+  pub fn write_char(&self, x :i16, y: i16, c: char, _color: u8, count: i16) {
     let bounds = self.get_bounds();
     //todo use make_global for now tviews does not have group
     //set_cursor_pos((bounds.a.x + x) as u16, (bounds.a.y + y) as u16);
     //use write_xx functions and create some functions using api
-    //print!("exetend x{},y{}", self.get_extent().b.x, self.get_extent().b.y);
-    let many = cmp::min(self.get_extent().b.x, count);
-    for i in 0..many {
-      //change by just one call to low lever api
-      write_char((bounds.a.x + x + i) as u16, (bounds.a.y + y) as u16, c);
-    }
+    //todo use color
+    write_nchar((bounds.a.x + x) as u16, (bounds.a.y + y) as u16, c, count);
   }
   
   //todo change to paint string or buffer as in TV
-  pub fn write_line(&self, x :i16, y: i16,  c: char) {
-    for i in 0..self.get_extent().b.y {
-     self.write_char(x, y+i, c,  self.get_extent().b.x);
-     println!();
+  pub fn write_line(&self, x :i16, y: i16, w:i16, h: i16,  c: char) {
+    let bounds = self.get_bounds();
+    let w2 = cmp::min(self.get_extent().b.x, w);
+    let h2 = cmp::min(self.get_extent().b.y, h);
+    for i in 0..h2 {
+      write_nchar((bounds.a.x + x) as u16, (bounds.a.y + y + i) as u16, c, w2);
     }
   } 
 }
