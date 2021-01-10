@@ -10,6 +10,7 @@ fn main() {
     //println!("Hello, world!");
     //screen::say_hi_base();
     //screen::say_hi();
+    screen::init();
     let _res = screen::TResolution  { x:80, y:25};
     screen::clear();
     //screen::set_cursor_pos(0, 10);
@@ -27,7 +28,7 @@ fn main() {
     //print!("{}",3*'c'); 
 
     let tview = view::TView::new(r1);
-    tview.write_char(1, 1, '=', 0, 20);
+    tview.write_char(1, 1, '=', 16, 20);
 
     
     let r2 = rect::TRect { 
@@ -36,8 +37,10 @@ fn main() {
     };
 
     let tview2 = view::TView::new(r2);
-    tview2.write_line(0, 0, 11, 11,  '#');
-    tview2.write_line(1, 1, 8, 8,  '$');
+    tview2.write_line(0, 0, 11, 11, '#');
+    tview2.write_line(1, 1, 8, 8, '$');
+
+    screen::set_cursor_pos(0, 22);
 
 
 

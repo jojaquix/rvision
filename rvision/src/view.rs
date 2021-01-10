@@ -45,15 +45,14 @@ impl TView {
   /// 'c' in the color determined by the color'th entry in the current view's
   /// palette. Should only be used in @ref draw() functions.
   
-  pub fn write_char(&self, x :i16, y: i16, c: char, _color: u8, count: i16) {
+  pub fn write_char(&self, x :i16, y: i16, c: char, color: u16, count: i16) {
     let bounds = self.get_bounds();
     //todo use make_global for now tviews does not have group
-    //set_cursor_pos((bounds.a.x + x) as u16, (bounds.a.y + y) as u16);
-    //use write_xx functions and create some functions using api
-    //todo use color
+    set_color(color);
     write_nchar((bounds.a.x + x) as u16, (bounds.a.y + y) as u16, c, count);
   }
-  
+
+  ///
   //todo change to paint string or buffer as in TV
   pub fn write_line(&self, x :i16, y: i16, w:i16, h: i16,  c: char) {
     let bounds = self.get_bounds();
@@ -62,7 +61,12 @@ impl TView {
     for i in 0..h2 {
       write_nchar((bounds.a.x + x) as u16, (bounds.a.y + y + i) as u16, c, w2);
     }
-  } 
+  }
+  
+  
+  pub fn write_lineb (&self, x :i16, y: i16, w:i16, h: i16,  buf: Vec<u8>) {
+    panic!("Not implemented")
+  }
 }
 
 // common functionality that needs some T with View trait

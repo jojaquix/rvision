@@ -47,6 +47,12 @@ pub fn say_hi() {
   imp::say_hi()
 }
 
+
+/// init the screen
+pub fn init() {
+  imp::init()
+}
+
 /// clear entire the screen
 pub fn clear() {
   imp::clear()
@@ -71,6 +77,10 @@ pub fn set_cursor_pos(x: u16, y: u16 ) {
 /// (x, y) == (col, row)
 pub fn get_cursor_pos() -> (u16, u16) {
   imp::get_cursor_pos()
+}
+
+pub fn set_color(color: u16) {
+  imp::set_color(color);
 }
 
 /// write on screen global coordinates
