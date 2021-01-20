@@ -3,7 +3,8 @@ use crate::rvision::screen;
 use crate::rvision::point;
 use crate::rvision::rect;
 use crate::rvision::view;
-
+use crate::rvision::drawbuf;
+use crate::rvision::view::View;
 
 
 fn main() {
@@ -36,9 +37,13 @@ fn main() {
         b: point::TPoint{x: 60, y: 20 }
     };
 
+    tview.draw();
+
     let tview2 = view::TView::new(r2);
     tview2.write_line(0, 0, 11, 11, '#');
     tview2.write_line(1, 1, 8, 8, '$');
+
+    tview2.draw();
 
     screen::set_cursor_pos(0, 22);
 
@@ -48,9 +53,10 @@ fn main() {
 
 #[cfg(test)]
 mod test {
-    use super::*;    
+    use super::*;
     use crate::point::*;
     use crate::rect::*;
+    use crate::drawbuf::*;
 
     #[test]
     fn clear_test() {
@@ -134,6 +140,13 @@ mod test {
         r12.union(r2);
         assert!(r12.equal(TRect { a: TPoint {x: 10, y: 10}, 
             b: TPoint{x: 50, y: 50 }}));
+
+    }
+
+    #[test]
+    fn tdrawbuff_test() {
+        let mut df1 = TDrawBuffer::new();
+
 
     }
 
