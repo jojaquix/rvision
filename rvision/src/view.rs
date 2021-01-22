@@ -126,12 +126,30 @@ pub trait View {
   /// Beginning at the point (x, y), writes 'count' copies of the character
   /// 'c' in the color determined by the color'th entry in the current view's
   /// palette. Should only be used in @ref draw() functions.
+  /// I guess the behaivior is: 
+  /// If x + count exceds limits start next posible coodinate one line below ????
+  /// 
   
   fn write_char(&self, x :i16, y: i16, c: char, color: u16, count: i16) {
+    //from original writechar
+    let mut nx = if x<0 { 0i16 } else { x };
+    if nx+count > MAX_VIEW_WIDTH as i16 { return };
+    
+    //from writeview
     let bounds = self.get_bounds();
+    if y<0 || y > bounds.b.y { return };
+    //let mut nx = if x<0 { 0i16 } else { x };
+    let mut x2 = if nx + count > bounds.b.x { bounds.b.x } else { nx + count };
+    if nx > x2 { return };  
+
     //todo use make_global for now tviews does not have group
-    set_color(color);
-    write_nchar((bounds.a.x + x) as u16, (bounds.a.y + y) as u16, c, count);
+    set_color(color);    
+    //todo change this for something like writeview
+    //for now ! this !! count must not change
+    //calcs are in nx and x2 and passed to writeview 
+    let ncount = range(count, 0, self.get_extent().b.x - nx + 1); //this will change!!!!!
+    write_nchar((bounds.a.x + nx) as u16, (bounds.a.y + y) as u16, c, ncount);
+    //print!("nx {}", nx);
   }
   
   /**

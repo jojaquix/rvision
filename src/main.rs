@@ -29,7 +29,9 @@ fn main() {
     //print!("{}",3*'c'); 
 
     let tview = view::TView::new(r1);
-    tview.write_char(1, 1, '=', 16, 20);
+    tview.write_char(15, 1, '=', 16, 20);
+    
+    tview.draw();
 
     
     let r2 = rect::TRect { 
@@ -37,10 +39,9 @@ fn main() {
         b: point::TPoint{x: 60, y: 20 }
     };
 
-    tview.draw();
 
     let tview2 = view::TView::new(r2);
-    tview2.write_line(0, 0, 11, 11, '#');
+    tview2.write_line(1, 0, 11, 11, '#');
     tview2.write_line(1, 1, 8, 8, '$');
 
     tview2.draw();

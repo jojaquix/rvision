@@ -1,6 +1,6 @@
 
 
-const MAX_VIEW_WIDTH :usize = 1024;
+pub const MAX_VIEW_WIDTH :usize = 1024;
 
 // 
 // may be a lot of memory use ???
