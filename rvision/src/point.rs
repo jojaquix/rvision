@@ -2,7 +2,7 @@ use std::ops::{Add, Sub, AddAssign, SubAssign};
 
 
 /// One point on the screen, with some vector operations
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 pub struct TPoint {
   pub x: i16,
   pub y: i16

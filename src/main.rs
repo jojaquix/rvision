@@ -4,7 +4,9 @@ use crate::rvision::point;
 use crate::rvision::rect;
 use crate::rvision::view;
 use crate::rvision::drawbuf;
-use crate::rvision::view::View;
+use crate::rvision::view::*;
+use crate::rvision::group::*;
+
 
 
 fn main() {
@@ -28,27 +30,27 @@ fn main() {
             };
     //print!("{}",3*'c'); 
 
-    let tview = view::TView::new(r1);
-    tview.write_char(15, 1, '=', 16, 20);
     
+    let tgroup  = TGroup {name:String::from("Jhon")};
+    let tview = view::TView::new(r1, Some(&tgroup));
+    tview.write_char(1, 1, '=', 16, 20);
     tview.draw();
+
+    tgroup.hello();
 
     
     let r2 = rect::TRect { 
-        a: point::TPoint {x: 50, y: 10}, 
+        a: point::TPoint {x: 50, y: 10},
         b: point::TPoint{x: 60, y: 20 }
     };
 
 
-    let tview2 = view::TView::new(r2);
-    tview2.write_line(1, 0, 11, 11, '#');
-    tview2.write_line(1, 1, 8, 8, '$');
-
+    let tview2 = view::TView::new(r2, None);
     tview2.draw();
+    tview2.write_line(1, 1, 8, 1, '#');
+    tview2.write_line(1, 2, 8, 8, '$');
 
-    screen::set_cursor_pos(0, 22);
-
-
+    screen::set_cursor_pos(0, 50);
 
 }
 

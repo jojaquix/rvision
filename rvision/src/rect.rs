@@ -1,7 +1,7 @@
 use crate::point::*;
 use std::cmp;
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 pub struct TRect {
   pub a : TPoint,
   pub b: TPoint

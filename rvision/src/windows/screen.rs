@@ -16,12 +16,15 @@ use winapi::um::wincon::{ GetConsoleScreenBufferInfo,
   CONSOLE_SCREEN_BUFFER_INFO, 
   COORD, };
 
-use winapi::um::wincon::{ FOREGROUND_RED, 
-                          FOREGROUND_INTENSITY, 
-                          FOREGROUND_GREEN, 
-                          BACKGROUND_GREEN 
-                        };
-
+use winapi::um::wincon::{ 
+  FOREGROUND_RED, 
+  FOREGROUND_GREEN, 
+  FOREGROUND_BLUE,
+  FOREGROUND_INTENSITY, 
+  BACKGROUND_RED,
+  BACKGROUND_GREEN,
+  BACKGROUND_BLUE,
+  BACKGROUND_INTENSITY };
 
 
 use winapi::um::winnt::{ HANDLE, CHAR, WCHAR };
@@ -169,7 +172,7 @@ fn get_size() -> (u16, u16) {
 
 pub fn set_color(_color: u16) {
   let success: BOOL;
-  let color2 = FOREGROUND_GREEN | FOREGROUND_INTENSITY ;
+  let color2 = FOREGROUND_GREEN | FOREGROUND_INTENSITY;
   unsafe {
     let h_stdout = hOut as HANDLE;
     success = SetConsoleTextAttribute(h_stdout, color2);
@@ -205,14 +208,15 @@ pub fn write_nchar(x: u16, y: u16, c: char, count: i16) {
   let mut written: DWORD = 0;
   set_cursor_pos(x, y);
   
-
-  unsafe {
-    let h_stdout = hOut as HANDLE;
-    success = WriteConsoleW(h_stdout, wide_encoded.as_ptr() as PVOID, wide_encoded.len() as DWORD, &mut written, NULL)
-  }
-  if success == FALSE {
-    panic!("Error in low level access to console writing nchar");
-  }  
+  if !wide_encoded.is_empty() {
+    unsafe {
+      let h_stdout = hOut as HANDLE;
+      success = WriteConsoleW(h_stdout, wide_encoded.as_ptr() as PVOID, wide_encoded.len() as DWORD, &mut written, NULL)
+    }
+    if success == FALSE {
+      panic!("Error in low level access to console writing nchar");
+    } 
+  } 
 }
 
 pub fn write_char(x: u16, y: u16, c: char) {

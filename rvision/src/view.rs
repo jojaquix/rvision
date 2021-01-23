@@ -2,6 +2,11 @@ use crate::point::*;
 use crate::rect::*;
 use crate::screen::*;
 use crate::drawbuf::*;
+use crate::group::*;
+use crate::group::Group;
+
+
+
 use std::cmp;
 
 pub fn range<T: PartialOrd>(Val: T, Min: T , Max:T ) -> T {
@@ -15,16 +20,16 @@ pub fn range<T: PartialOrd>(Val: T, Min: T , Max:T ) -> T {
 /// "The displayable classes derived from TObject
 /// give you object known as views."
 
-pub struct TView {
+pub struct TView<'a> {
   /// origin point on owner's coordinate system
   origin: TPoint,
-  size: TPoint
+  size: TPoint,
+  owner: Option<&'a Group>,
 }
 
-
-impl TView {
-  pub fn new(bounds: TRect) -> Self {
-    let tview = TView { origin: bounds.a, size: bounds.b - bounds.a};
+impl<'a> TView<'a> {
+  pub fn new(bounds: TRect, owner: Option<&'a Group>) -> Self {
+    let tview = TView { origin: bounds.a, size: bounds.b - bounds.a, owner : owner};
     tview
   }
   
@@ -81,14 +86,19 @@ impl TView {
 
 //todo add default imps based on others methods of trait
 
-pub trait View {
+pub trait View<'a> {
 
   // Returns the current value of size, the bounding rectangle of the view
   // in its owner's coordinate system.
   fn get_bounds(&self) -> TRect;
 
   // Returns the extent rectangle of the view.
+  // one TRect that represent the size of the view
   fn get_extent(&self) -> TRect;
+
+  //get owner
+  fn get_owner(&self) -> Option<&'a Group>;
+
   
   // Changes the bounds of the view to those of the `bounds' argument.
   // The view is redrawn in its new location.
@@ -107,7 +117,23 @@ pub trait View {
 
   fn set_bounds(&mut self, bounds: TRect);
 
-
+  /**
+   * Draws the view on the screen.
+   *
+   * Called whenever the view must draw (display) itself. draw() must cover
+   * the entire area of the view.
+   *
+   * This member function must be overridden appropriately for each derived
+   * class. draw() is seldom called directly, since it is more efficient to
+   * use @ref drawView(), which draws only views that are exposed; that is,
+   * some or all of the view is visible on the screen.
+   *
+   * If required, draw can call @ref getClipRect() to obtain the rectangle
+   * that needs redrawing, and then only draw that area. For complicated
+   * views, this can improve performance noticeably.
+   *
+   * To perform its task, draw() usually uses a @ref TDrawBuffer object.
+   */
   // the most important method for any displayable object
   fn draw(&self) {
     let bounds = self.get_bounds();
@@ -116,6 +142,17 @@ pub trait View {
     write_char(bounds.b.x as u16, bounds.a.y as u16, '╗');
     write_char(bounds.a.x as u16, bounds.b.y as u16, '╚');
     write_char(bounds.b.x as u16, bounds.b.y as u16, '╝');
+
+    match self.get_owner() {
+      Some(group) => 
+        { 
+          println!("Llamado desde el view");
+          group.hello();
+        },
+      
+        None => {},
+    }
+
   }
 
   //fn draw_if_exposed(&self);
@@ -131,25 +168,38 @@ pub trait View {
   /// 
   
   fn write_char(&self, x :i16, y: i16, c: char, color: u16, count: i16) {
+    set_color(color);
+    self.write_nchar(x, y, c, count);
+  }
+
+  /// write character count times 
+  /// taking in count view limits
+  /// not TV 
+  /// in starting in (x,y) own coordinates
+  fn write_nchar(&self, x :i16, y: i16, c: char, count: i16) {
+      
     //from original writechar
-    let mut nx = if x<0 { 0i16 } else { x };
+    let nx = if x<0 { 0i16 } else { x };
     if nx+count > MAX_VIEW_WIDTH as i16 { return };
+    
     
     //from writeview
     let bounds = self.get_bounds();
-    if y<0 || y > bounds.b.y { return };
-    //let mut nx = if x<0 { 0i16 } else { x };
-    let mut x2 = if nx + count > bounds.b.x { bounds.b.x } else { nx + count };
+    if y < 0 || y > bounds.b.y { return };
+    let x2 = cmp::min(bounds.b.x, nx + count);
+
     if nx > x2 { return };  
 
-    //todo use make_global for now tviews does not have group
-    set_color(color);    
     //todo change this for something like writeview
     //for now ! this !! count must not change
     //calcs are in nx and x2 and passed to writeview 
-    let ncount = range(count, 0, self.get_extent().b.x - nx + 1); //this will change!!!!!
+    //let ncount = range(count, 0, self.get_extent().b.x - nx + 1); //this will change!!!!!
+    let ncount  = cmp::min(self.get_extent().b.x, count);
+    //println!("bounds:{:?}", bounds);
+    //println!("x1:{:?} x2:{:?} count: {} \n", nx, x2, ncount);
+    
+    //todo use make_global for now tviews does not have group/owner
     write_nchar((bounds.a.x + nx) as u16, (bounds.a.y + y) as u16, c, ncount);
-    //print!("nx {}", nx);
   }
   
   /**
@@ -161,11 +211,11 @@ pub trait View {
    */  
   
   fn write_line(&self, x :i16, y: i16, w:i16, h: i16,  c: char) {
-    let bounds = self.get_bounds();
     let w2 = cmp::min(self.get_extent().b.x, w);
     let h2 = cmp::min(self.get_extent().b.y, h);
+    //println!("w2:{:?} h2:{:?}", w2, h2);
     for i in 0..h2 {
-      write_nchar((bounds.a.x + x) as u16, (bounds.a.y + y + i) as u16, c, w2);
+      self.write_nchar(x,y + i, c, w2);
     }
   }
   
@@ -184,9 +234,10 @@ pub trait View {
       write_nchar((bounds.a.x + x) as u16, (bounds.a.y + y + i) as u16, '$', w2);
     }
   }
+
 }
 
-  impl View for TView {
+  impl <'a> View<'a> for TView<'a> {
 
   fn set_bounds(&mut self, bounds: TRect) {
     self.origin = bounds.a;
@@ -199,6 +250,11 @@ pub trait View {
 
   fn get_extent(&self) -> TRect {
     TRect { a: TPoint {x: 0, y: 0}, b: self.size }
+  }
+
+  fn get_owner(&self) -> Option<&'a Group> {
+    return self.owner;
+
   }
 
 }
