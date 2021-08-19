@@ -1,20 +1,20 @@
 extern crate rvision;
-use crate::rvision::screen;
+use crate::rvision::drawbuf;
+use crate::rvision::group::*;
 use crate::rvision::point;
 use crate::rvision::rect;
+use crate::rvision::screen;
 use crate::rvision::view;
-use crate::rvision::drawbuf;
 use crate::rvision::view::*;
-use crate::rvision::group::*;
 
-
+use std::rc::Rc;
 
 fn main() {
     //println!("Hello, world!");
     //screen::say_hi_base();
     //screen::say_hi();
     screen::init();
-    let _res = screen::TResolution  { x:80, y:25};
+    let _res = screen::TResolution { x: 80, y: 25 };
     screen::clear();
     //screen::set_cursor_pos(0, 10);
     let mut cur_pos = screen::get_cursor_pos();
@@ -24,42 +24,37 @@ fn main() {
     //println!("{:?}", cur_pos);
 
     //let mut _p1 = point::TPoint { x: cur_pos.0 as i16, y: cur_pos.1 as i16};
-    let mut r1 = rect::TRect { 
-                a: point::TPoint {x: 5, y: 5}, 
-                b: point::TPoint{x: 20, y: 10 }
-            };
-    //print!("{}",3*'c'); 
+    let  r1 = rect::TRect {
+        a: point::TPoint { x: 5, y: 5 },
+        b: point::TPoint { x: 20, y: 10 },
+    };
+    //print!("{}",3*'c');
 
-    
-    let tgroup  = TGroup {name:String::from("Jhon")};
-    let tview = view::TView::new(r1, Some(&tgroup));
-    tview.write_char(1, 1, '=', 16, 20);
+    let tgroup = TGroup::new(String::from("Jhon"));
+    let tview = view::TView::new(r1, Some(Rc::downgrade(&tgroup)));
+    tview.write_char(1, 1, 'x', 16, 20);
     tview.draw();
 
-    tgroup.hello();
 
-    
-    let r2 = rect::TRect { 
-        a: point::TPoint {x: 50, y: 10},
-        b: point::TPoint{x: 60, y: 20 }
+    let r2 = rect::TRect {
+        a: point::TPoint { x: 50, y: 10 },
+        b: point::TPoint { x: 60, y: 20 },
     };
-
 
     let tview2 = view::TView::new(r2, None);
     tview2.draw();
-    tview2.write_line(1, 1, 8, 1, '#');
-    tview2.write_line(1, 2, 8, 8, '$');
+    //tview2.write_line(1, 1, 8, 1, 'h');
+    //tview2.write_line(1, 2, 8, 8, 'a');
 
     screen::set_cursor_pos(0, 50);
-
 }
 
 #[cfg(test)]
 mod test {
     use super::*;
+    use crate::drawbuf::*;
     use crate::point::*;
     use crate::rect::*;
-    use crate::drawbuf::*;
 
     #[test]
     fn clear_test() {
@@ -85,8 +80,8 @@ mod test {
 
     #[test]
     fn point_test() {
-        let p1 = TPoint { x: 10, y: 20};
-        let p2 = point::TPoint { x: 5, y: 5};
+        let p1 = TPoint { x: 10, y: 20 };
+        let p2 = point::TPoint { x: 5, y: 5 };
         let p3 = p1 + p2;
         assert!(p3.x == 15 && p3.y == 25);
         assert!(!point::TPoint::equal(p1, p2));
@@ -102,23 +97,22 @@ mod test {
         let mut p7 = p6;
         p7 -= p2;
         assert!(point::TPoint::equal(p7, p1));
-
     }
 
     #[test]
     fn rect_test() {
-        let r1 = TRect { 
-            a: TPoint {x: 10, y: 10}, 
-            b: TPoint{x: 40, y: 40 }
+        let r1 = TRect {
+            a: TPoint { x: 10, y: 10 },
+            b: TPoint { x: 40, y: 40 },
         };
 
-        let r2 = TRect { 
-            a: TPoint {x: 20, y: 20}, 
-            b: TPoint{x: 50, y: 50 }
+        let r2 = TRect {
+            a: TPoint { x: 20, y: 20 },
+            b: TPoint { x: 50, y: 50 },
         };
 
-        let p1 = TPoint { x: 5, y: 5};
-        let p2 = TPoint { x: 15, y: 15};
+        let p1 = TPoint { x: 5, y: 5 };
+        let p2 = TPoint { x: 15, y: 15 };
 
         assert!(r1.contains(p2));
         assert!(!r1.contains(p1));
@@ -134,23 +128,23 @@ mod test {
 
         let mut r11 = r1;
         r11.intersect(r2);
-        assert!(r11.equal(TRect { a: TPoint {x: 20, y: 20}, 
-            b: TPoint{x: 40, y: 40 }}));
+        assert!(r11.equal(TRect {
+            a: TPoint { x: 20, y: 20 },
+            b: TPoint { x: 40, y: 40 }
+        }));
 
         assert!(!r11.equal(r1));
 
         let mut r12 = r1;
         r12.union(r2);
-        assert!(r12.equal(TRect { a: TPoint {x: 10, y: 10}, 
-            b: TPoint{x: 50, y: 50 }}));
-
+        assert!(r12.equal(TRect {
+            a: TPoint { x: 10, y: 10 },
+            b: TPoint { x: 50, y: 50 }
+        }));
     }
 
     #[test]
     fn tdrawbuff_test() {
         let mut df1 = TDrawBuffer::new();
-
-
     }
-
 }

@@ -1,39 +1,50 @@
+use crate::drawbuf::*;
+use crate::group::*;
 use crate::point::*;
 use crate::rect::*;
 use crate::screen::*;
-use crate::drawbuf::*;
-use crate::group::*;
+//use crate::group::OGroupLink;
 use crate::group::Group;
 
-
-
 use std::cmp;
+use std::rc::Rc;
+use std::rc::Weak;
 
-pub fn range<T: PartialOrd>(Val: T, Min: T , Max:T ) -> T {
-  if Val < Min { Min } else if Val > Max  { Max } else  { Val } 
-} 
+pub fn range<T: PartialOrd>(Val: T, Min: T, Max: T) -> T {
+  if Val < Min {
+    Min
+  } else if Val > Max {
+    Max
+  } else {
+    Val
+  }
+}
 
 /// As in the original tvision tview is
-/// any object displayable in a rectangular portion of 
-/// screen. 
-/// from turbo vision for C++: 
+/// any object displayable in a rectangular portion of
+/// screen.
+/// from turbo vision for C++:
 /// "The displayable classes derived from TObject
 /// give you object known as views."
 
-pub struct TView<'a> {
+pub struct TView {
   /// origin point on owner's coordinate system
   origin: TPoint,
   size: TPoint,
-  owner: Option<&'a Group>,
+  owner: OWGroupLink,
 }
 
-impl<'a> TView<'a> {
-  pub fn new(bounds: TRect, owner: Option<&'a Group>) -> Self {
-    let tview = TView { origin: bounds.a, size: bounds.b - bounds.a, owner : owner};
+impl TView {
+  pub fn new(bounds: TRect, owner: OWGroupLink) -> Self {
+    let tview = TView {
+      origin: bounds.a,
+      size: bounds.b - bounds.a,
+      owner: owner,
+    };
     tview
   }
-  
-/*  pub fn set_bounds(&mut self, bounds: TRect) {
+
+  /*  pub fn set_bounds(&mut self, bounds: TRect) {
     self.origin = bounds.a;
     self.size = bounds.b - bounds.a;
   }
@@ -49,7 +60,6 @@ impl<'a> TView<'a> {
   /// Beginning at the point (x, y), writes 'count' copies of the character
   /// 'c' in the color determined by the color'th entry in the current view's
   /// palette. Should only be used in @ref draw() functions.
-  
   pub fn write_char(&self, x :i16, y: i16, c: char, color: u16, count: i16) {
     let bounds = self.get_bounds();
     //todo use make_global for now tviews does not have group
@@ -67,15 +77,14 @@ impl<'a> TView<'a> {
       write_nchar((bounds.a.x + x) as u16, (bounds.a.y + y + i) as u16, c, w2);
     }
   }
-  
-  
+
   pub fn write_line_buffer (&self, x :i16, y: i16, w:i16, h: i16,  buf: TDrawBuffer) {
     let bounds = self.get_bounds();
     let w2 = cmp::min(self.get_extent().b.x, w);
     let h2 = cmp::min(self.get_extent().b.y, h);
     for i in 0..h2 {
       write_nchar((bounds.a.x + x) as u16, (bounds.a.y + y + i) as u16, '$', w2);
-    }    
+    }
   }*/
 }
 
@@ -86,8 +95,7 @@ impl<'a> TView<'a> {
 
 //todo add default imps based on others methods of trait
 
-pub trait View<'a> {
-
+pub trait View {
   // Returns the current value of size, the bounding rectangle of the view
   // in its owner's coordinate system.
   fn get_bounds(&self) -> TRect;
@@ -97,9 +105,8 @@ pub trait View<'a> {
   fn get_extent(&self) -> TRect;
 
   //get owner
-  fn get_owner(&self) -> Option<&'a Group>;
+  fn get_owner(&self) -> OWGroupLink;
 
-  
   // Changes the bounds of the view to those of the `bounds' argument.
   // The view is redrawn in its new location.
   // locate() calls @ref sizeLimits() to verify that the given bounds are
@@ -109,10 +116,10 @@ pub trait View<'a> {
 
   // Moves the origin to the point (x,y) relative to the owner's view. The
   // view's size is unchanged.
-  //fn move_to(&mut self, x :i16, y: i16);   
+  //fn move_to(&mut self, x :i16, y: i16);
 
   // Returns in the ('min', 'max') , the minimum and maximum values
-  // that @ref size data member may assume  
+  // that @ref size data member may assume
   //fn size_limits(&self) -> (TPoint, TPoint);
 
   fn set_bounds(&mut self, bounds: TRect);
@@ -144,117 +151,124 @@ pub trait View<'a> {
     write_char(bounds.b.x as u16, bounds.b.y as u16, '╝');
 
     match self.get_owner() {
-      Some(group) => 
-        { 
-          println!("Llamado desde el view");
-          group.hello();
-        },
-      
-        None => {},
+      Some(groupLink) => {
+        print!("Llamado desde el view ");
+        match groupLink.upgrade() {
+          Some(group) => {
+            group.borrow().hello();
+          }
+          _ => {}
+        }
+      }
+      _ => {}
     }
-
   }
 
   //fn draw_if_exposed(&self);
 
-
   // write functions
-   
   /// Beginning at the point (x, y), writes 'count' copies of the character
   /// 'c' in the color determined by the color'th entry in the current view's
   /// palette. Should only be used in @ref draw() functions.
-  /// I guess the behaivior is: 
+  /// I guess the behaivior is:
   /// If x + count exceds limits start next posible coodinate one line below ????
-  /// 
-  
-  fn write_char(&self, x :i16, y: i16, c: char, color: u16, count: i16) {
+  ///
+
+  fn write_char(&self, x: i16, y: i16, c: char, color: u16, count: i16) {
     set_color(color);
     self.write_nchar(x, y, c, count);
   }
 
-  /// write character count times 
+  /// write character count times
   /// taking in count view limits
-  /// not TV 
+  /// not TV
   /// in starting in (x,y) own coordinates
-  fn write_nchar(&self, x :i16, y: i16, c: char, count: i16) {
-      
+  fn write_nchar(&self, x: i16, y: i16, c: char, count: i16) {
     //from original writechar
-    let nx = if x<0 { 0i16 } else { x };
-    if nx+count > MAX_VIEW_WIDTH as i16 { return };
-    
-    
+    let nx = if x < 0 { 0i16 } else { x };
+    if nx + count > MAX_VIEW_WIDTH as i16 {
+      return;
+    };
     //from writeview
     let bounds = self.get_bounds();
-    if y < 0 || y > bounds.b.y { return };
+    if y < 0 || y > bounds.b.y {
+      return;
+    };
     let x2 = cmp::min(bounds.b.x, nx + count);
 
-    if nx > x2 { return };  
+    if nx > x2 {
+      return;
+    };
 
     //todo change this for something like writeview
     //for now ! this !! count must not change
-    //calcs are in nx and x2 and passed to writeview 
+    //calcs are in nx and x2 and passed to writeview
     //let ncount = range(count, 0, self.get_extent().b.x - nx + 1); //this will change!!!!!
-    let ncount  = cmp::min(self.get_extent().b.x, count);
+    let ncount = cmp::min(self.get_extent().b.x, count);
     //println!("bounds:{:?}", bounds);
     //println!("x1:{:?} x2:{:?} count: {} \n", nx, x2, ncount);
-    
     //todo use make_global for now tviews does not have group/owner
     write_nchar((bounds.a.x + nx) as u16, (bounds.a.y + y) as u16, c, ncount);
   }
-  
   /**
    * Writes the line contained in the buffer 'b' to the screen, beginning at
    * the point (x, y) within the rectangle defined by the width 'w' and the
    * height 'h'. If 'h' is greater than 1, the line will be repeated 'h'
    * times. Should only be used in @ref draw() member functions.
    * TODO: change c by string b
-   */  
-  
-  fn write_line(&self, x :i16, y: i16, w:i16, h: i16,  c: char) {
+   */
+
+  fn write_line(&self, x: i16, y: i16, w: i16, h: i16, c: char) {
     let w2 = cmp::min(self.get_extent().b.x, w);
     let h2 = cmp::min(self.get_extent().b.y, h);
     //println!("w2:{:?} h2:{:?}", w2, h2);
     for i in 0..h2 {
-      self.write_nchar(x,y + i, c, w2);
+      self.write_nchar(x, y + i, c, w2);
     }
   }
-  
   /**
    * Writes the line contained in the buffer `b' to the screen, beginning at
    * the point (x, y) within the rectangle defined by the width `w' and the
    * height `h'. If `h' is greater than 1, the line will be repeated `h'
    * times. Should only be used in @ref draw() member functions.
    * @see TDrawBuffer
-   */    
-  fn write_line_buffer (&self, x :i16, y: i16, w:i16, h: i16,  buf: TDrawBuffer) {
+   */
+  fn write_line_buffer(&self, x: i16, y: i16, w: i16, h: i16, buf: TDrawBuffer) {
     let bounds = self.get_bounds();
     let w2 = cmp::min(self.get_extent().b.x, w);
     let h2 = cmp::min(self.get_extent().b.y, h);
     for i in 0..h2 {
-      write_nchar((bounds.a.x + x) as u16, (bounds.a.y + y + i) as u16, '$', w2);
+      write_nchar(
+        (bounds.a.x + x) as u16,
+        (bounds.a.y + y + i) as u16,
+        '$',
+        w2,
+      );
     }
   }
-
 }
 
-  impl <'a> View<'a> for TView<'a> {
-
+impl View for TView {
   fn set_bounds(&mut self, bounds: TRect) {
     self.origin = bounds.a;
     self.size = bounds.b - bounds.a;
   }
 
   fn get_bounds(&self) -> TRect {
-    TRect { a: self.origin, b: self.origin + self.size }
+    TRect {
+      a: self.origin,
+      b: self.origin + self.size,
+    }
   }
 
   fn get_extent(&self) -> TRect {
-    TRect { a: TPoint {x: 0, y: 0}, b: self.size }
+    TRect {
+      a: TPoint { x: 0, y: 0 },
+      b: self.size,
+    }
   }
 
-  fn get_owner(&self) -> Option<&'a Group> {
-    return self.owner;
-
+  fn get_owner(&self) -> OWGroupLink {
+    return self.owner.clone();
   }
-
 }
