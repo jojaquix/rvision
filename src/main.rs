@@ -146,5 +146,21 @@ mod test {
     #[test]
     fn tdrawbuff_test() {
         let mut df1 = TDrawBuffer::new();
+        df1.move_char(2, 'न', 3, 10);
+
+        assert!(df1.get_char_at(0) == ' ');
+        assert!(df1.get_char_at(1) == ' ');
+        assert!(df1.get_char_at(2) == 'न');
+        assert!(df1.get_attr_at(1) == 0);
+        assert!(df1.get_attr_at(2) == 3);
+        
     }
+
+    #[test]
+    fn tdrawbuff_test2() {
+        let mut df = TDrawBuffer::new();
+        df.move_string(2, String::from("태권도"), 3);
+        
+    }
+
 }
