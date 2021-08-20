@@ -246,6 +246,18 @@ pub trait View {
       );
     }
   }
+
+
+  fn get_color(&self, index: u8) -> u8 {
+     //todo finish this
+     //using map color
+     return 3;
+  }
+
+  fn map_color(&self, color: u8) -> u8 {
+    //todo finish this using palete
+    return color;
+  }
 }
 
 impl View for TView {
@@ -271,4 +283,5 @@ impl View for TView {
   fn get_owner(&self) -> OWGroupLink {
     return self.owner.clone();
   }
+
 }
