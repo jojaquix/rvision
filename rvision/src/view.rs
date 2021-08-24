@@ -141,21 +141,23 @@ pub trait View {
    *
    * To perform its task, draw() usually uses a @ref TDrawBuffer object.
    */
-  // the most important method for any displayable object
-  fn draw(&self) {
+  fn draw(&self) {    
+    
     let bounds = self.get_bounds();
-    //todo make global ?
-    write_char(bounds.a.x as u16, bounds.a.y as u16, '╔');
-    write_char(bounds.b.x as u16, bounds.a.y as u16, '╗');
-    write_char(bounds.a.x as u16, bounds.b.y as u16, '╚');
-    write_char(bounds.b.x as u16, bounds.b.y as u16, '╝');
+    let ga = self.make_global(bounds.a);    
+    let gb = self.make_global(bounds.b);
+
+    //very basic view draw :)
+    write_char(ga.x as u16, ga.y as u16, '╔');
+    write_char(gb.x as u16, ga.y as u16, '╗');
+    write_char(ga.x as u16, gb.y as u16, '╚');
+    write_char(gb.x as u16, gb.y as u16, '╝');
 
     match self.get_owner() {
-      Some(groupLink) => {
-        print!("Llamado desde el view ");
+      Some(groupLink) => {        
         match groupLink.upgrade() {
           Some(group) => {
-            group.borrow().hello();
+            //group.borrow().hello();
           }
           _ => {}
         }
@@ -206,9 +208,11 @@ pub trait View {
     //let ncount = range(count, 0, self.get_extent().b.x - nx + 1); //this will change!!!!!
     let ncount = cmp::min(self.get_extent().b.x, count);
     //println!("bounds:{:?}", bounds);
-    //println!("x1:{:?} x2:{:?} count: {} \n", nx, x2, ncount);
-    //todo use make_global for now tviews does not have group/owner
-    write_nchar((bounds.a.x + nx) as u16, (bounds.a.y + y) as u16, c, ncount);
+    //println!("x1:{:?} x2:{:?} count: {} \n", nx, x2, ncount);   
+
+    let g = self.make_global(TPoint {x: x, y: y});
+
+    write_nchar(g.x as u16, g.y as u16, c, ncount);
   }
   /**
    * Writes the line contained in the buffer 'b' to the screen, beginning at
@@ -258,6 +262,48 @@ pub trait View {
     //todo finish this using palete
     return color;
   }
+
+  fn make_global(&self, source: TPoint) -> TPoint {
+    let mut temp = self.get_bounds().a + source;
+    let mut own = self.get_owner();
+    loop {
+      match own {
+        Some(groupLink) => {        
+          match groupLink.upgrade() {
+            Some(group) => {              
+              temp += group.borrow().get_bounds().a;
+              own = group.borrow().get_owner();
+            }
+            _ => { break }
+          }
+        }
+        _ => { break }
+      }
+    }
+    return temp;
+  }
+
+
+  fn make_local(&self, source: TPoint) -> TPoint { 
+    let mut temp = self.get_bounds().a - source;
+    let mut own = self.get_owner();
+    loop {
+      match own {
+        Some(groupLink) => {        
+          match groupLink.upgrade() {
+            Some(group) => {              
+              temp -= group.borrow().get_bounds().a;
+              own = group.borrow().get_owner();
+            }
+            _ => { break }
+          }
+        }
+        _ => { break }
+      }
+    }
+    return temp;
+  }
+  
 }
 
 impl View for TView {

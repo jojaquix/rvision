@@ -24,29 +24,35 @@ fn main() {
     //println!("{:?}", cur_pos);
 
     //let mut _p1 = point::TPoint { x: cur_pos.0 as i16, y: cur_pos.1 as i16};
+    let  r = rect::TRect {
+        a: point::TPoint { x: 1,  y: 1 },
+        b: point::TPoint { x: 80, y: 30 },
+    };    
+
+    let tgroup = TGroup::new(String::from("Jhon"), r, None);
+
     let  r1 = rect::TRect {
-        a: point::TPoint { x: 5, y: 5 },
-        b: point::TPoint { x: 20, y: 10 },
+        a: point::TPoint { x: 1, y: 1 },
+        b: point::TPoint { x: 40, y: 15 },
     };
-    //print!("{}",3*'c');
-
-    let tgroup = TGroup::new(String::from("Jhon"));
     let tview = view::TView::new(r1, Some(Rc::downgrade(&tgroup)));
-    tview.write_char(1, 1, 'x', 16, 20);
     tview.draw();
-
+    
+    tview.write_char(2, 1, 'y', 10, 2);
+    
 
     let r2 = rect::TRect {
-        a: point::TPoint { x: 50, y: 10 },
-        b: point::TPoint { x: 60, y: 20 },
+        a: point::TPoint { x: 21, y: 1 },
+        b: point::TPoint { x: 45, y: 15 },
     };
 
-    let tview2 = view::TView::new(r2, None);
+    //let tview2 = view::TView::new(r2, None);
+    let tview2 = view::TView::new(r2, Some(Rc::downgrade(&tgroup)));
     tview2.draw();
     //tview2.write_line(1, 1, 8, 1, 'h');
     //tview2.write_line(1, 2, 8, 8, 'a');
 
-    screen::set_cursor_pos(0, 50);
+    screen::set_cursor_pos(0, 0);
 }
 
 #[cfg(test)]
