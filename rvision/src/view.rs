@@ -143,9 +143,9 @@ pub trait View {
    */
   fn draw(&self) {    
     
-    let bounds = self.get_bounds();
-    let ga = self.make_global(bounds.a);    
-    let gb = self.make_global(bounds.b);
+    let extent = self.get_extent();
+    let ga = self.make_global(extent.a);    
+    let gb = self.make_global(extent.b);
 
     //very basic view draw :)
     write_char(ga.x as u16, ga.y as u16, '╔');
@@ -209,7 +209,6 @@ pub trait View {
     let ncount = cmp::min(self.get_extent().b.x, count);
     //println!("bounds:{:?}", bounds);
     //println!("x1:{:?} x2:{:?} count: {} \n", nx, x2, ncount);   
-
     let g = self.make_global(TPoint {x: x, y: y});
 
     write_nchar(g.x as u16, g.y as u16, c, ncount);
@@ -264,7 +263,7 @@ pub trait View {
   }
 
   fn make_global(&self, source: TPoint) -> TPoint {
-    let mut temp = self.get_bounds().a + source;
+    let mut temp = source + self.get_bounds().a;
     let mut own = self.get_owner();
     loop {
       match own {
