@@ -25,7 +25,7 @@ fn main() {
 
     //let mut _p1 = point::TPoint { x: cur_pos.0 as i16, y: cur_pos.1 as i16};
     let  r = rect::TRect {
-        a: point::TPoint { x: 0,  y: 0 },
+        a: point::TPoint { x: 0,  y: 5 },
         b: point::TPoint { x: 80, y: 30 },
     };    
 

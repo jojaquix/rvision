@@ -7,8 +7,14 @@ use crate::screen::*;
 use crate::group::Group;
 
 use std::cmp;
+
+use std::cell::RefCell;
 use std::rc::Rc;
 use std::rc::Weak;
+
+pub type ViewLink = Rc<RefCell<dyn View>>;
+pub type OWViewLink = Option<Weak<RefCell<dyn View>>>;
+pub type OViewLink = Option<ViewLink>;
 
 pub fn range<T: PartialOrd>(Val: T, Min: T, Max: T) -> T {
   if Val < Min {
@@ -32,16 +38,20 @@ pub struct TView {
   origin: TPoint,
   size: TPoint,
   owner: OWGroupLink,
+
+  next: OViewLink,
+  prev: OWViewLink,
 }
 
 impl TView {
   pub fn new(bounds: TRect, owner: OWGroupLink) -> Self {
-    let tview = TView {
+    TView {
       origin: bounds.a,
       size: bounds.b - bounds.a,
       owner: owner,
-    };
-    tview
+      next: None,
+      prev: None,
+    }
   }
 
   /*  pub fn set_bounds(&mut self, bounds: TRect) {
@@ -104,6 +114,8 @@ pub trait View {
   // one TRect that represent the size of the view
   fn get_extent(&self) -> TRect;
 
+  
+  fn set_owner(&mut self, owner: OWGroupLink);
   //get owner
   fn get_owner(&self) -> OWGroupLink;
 
@@ -141,10 +153,26 @@ pub trait View {
    *
    * To perform its task, draw() usually uses a @ref TDrawBuffer object.
    */
-  fn draw(&self) {    
-    
+
+  fn draw(&self) {
+    //for now no more logic
+    //TODO: later we will have logic related with buffers
+    self.draw_view()
+  }
+
+  /**
+   * Draws the view on the screen.
+   *
+   * Calls @ref draw() if @ref exposed() returns True, indicating that the
+   * view is exposed (see @ref sfExposed). If @ref exposed() returns False,
+   * drawView() does nothing.
+   *
+   * You should call drawView() (not draw()) whenever you need to redraw a
+   * view after making a change that affects its visual appearance.
+   */
+  fn draw_view(&self) {
     let extent = self.get_extent();
-    let ga = self.make_global(extent.a);    
+    let ga = self.make_global(extent.a);
     let gb = self.make_global(extent.b);
 
     //very basic view draw :)
@@ -154,7 +182,7 @@ pub trait View {
     write_char(gb.x as u16, gb.y as u16, '╝');
 
     match self.get_owner() {
-      Some(groupLink) => {        
+      Some(groupLink) => {
         match groupLink.upgrade() {
           Some(group) => {
             //group.borrow().hello();
@@ -208,8 +236,8 @@ pub trait View {
     //let ncount = range(count, 0, self.get_extent().b.x - nx + 1); //this will change!!!!!
     let ncount = cmp::min(self.get_extent().b.x, count);
     //println!("bounds:{:?}", bounds);
-    //println!("x1:{:?} x2:{:?} count: {} \n", nx, x2, ncount);   
-    let g = self.make_global(TPoint {x: x, y: y});
+    //println!("x1:{:?} x2:{:?} count: {} \n", nx, x2, ncount);
+    let g = self.make_global(TPoint { x: x, y: y });
 
     write_nchar(g.x as u16, g.y as u16, c, ncount);
   }
@@ -250,11 +278,10 @@ pub trait View {
     }
   }
 
-
   fn get_color(&self, index: u8) -> u8 {
-     //todo finish this
-     //using map color
-     return 3;
+    //todo finish this
+    //using map color
+    return 3;
   }
 
   fn map_color(&self, color: u8) -> u8 {
@@ -267,42 +294,40 @@ pub trait View {
     let mut own = self.get_owner();
     loop {
       match own {
-        Some(groupLink) => {        
-          match groupLink.upgrade() {
-            Some(group) => {              
-              temp += group.borrow().get_bounds().a;
-              own = group.borrow().get_owner();
-            }
-            _ => { break }
+        Some(groupLink) => match groupLink.upgrade() {
+          Some(group) => {
+            temp += group.borrow().get_bounds().a;
+            own = group.borrow().get_owner();
           }
-        }
-        _ => { break }
+          _ => break,
+        },
+        _ => break,
       }
     }
     return temp;
   }
 
-
-  fn make_local(&self, source: TPoint) -> TPoint { 
+  fn make_local(&self, source: TPoint) -> TPoint {
     let mut temp = self.get_bounds().a - source;
     let mut own = self.get_owner();
     loop {
       match own {
-        Some(groupLink) => {        
-          match groupLink.upgrade() {
-            Some(group) => {              
-              temp -= group.borrow().get_bounds().a;
-              own = group.borrow().get_owner();
-            }
-            _ => { break }
+        Some(groupLink) => match groupLink.upgrade() {
+          Some(group) => {
+            temp -= group.borrow().get_bounds().a;
+            own = group.borrow().get_owner();
           }
-        }
-        _ => { break }
+          _ => break,
+        },
+        _ => break,
       }
     }
     return temp;
   }
-  
+
+  fn set_next(&mut self, next: OViewLink);
+
+  fn set_prev(&mut self, prev: OViewLink);
 }
 
 impl View for TView {
@@ -325,8 +350,21 @@ impl View for TView {
     }
   }
 
+  fn set_owner(&mut self, owner: OWGroupLink) {
+    self.owner = owner.clone();
+  } 
   fn get_owner(&self) -> OWGroupLink {
     return self.owner.clone();
   }
 
+  fn set_next(&mut self, next: OViewLink) {
+    self.next = next.clone(); //check
+  }
+
+  fn set_prev(&mut self, prev: OViewLink) {
+    self.prev = match prev {
+      Some(link) => Some(Rc::downgrade(&link)),
+      None => None,
+    }
+  }
 }

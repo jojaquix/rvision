@@ -68,6 +68,10 @@ pub fn get_cols() -> u16 {
   imp::get_cols()
 }
 
+pub fn get_resolution() -> TResolution {
+  TResolution {x: get_rows(), y: get_cols()}
+}
+
 /// set cursor position
 pub fn set_cursor_pos(x: u16, y: u16 ) {
   imp::set_cursor_pos(x, y)
